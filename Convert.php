@@ -2,7 +2,7 @@
 require 'vendor/autoload.php';
 use Intervention\Image\ImageManagerStatic as Image;
 
-class Converter  
+class Convert  
 {
     /**
      * Pass second parameter for quality ex. -q75
@@ -14,11 +14,11 @@ class Converter
     public function __construct($inputdir, $outputdir) {
         $this->imagedir = $inputdir;
         $this->outputdir = $outputdir;
+        $this->setImageQuality();
     }
 
     public function convert()
     {
-        $this->setImageQuality();
         $imageAr= $this->getImageArrayFromDirectory();
         die('ksdjh');
         try {
@@ -59,7 +59,7 @@ class Converter
 
 $image_directory= 'pictures/all/';  $output_directory= 'pictures/converted';
 
-$convert= new Converter($image_directory, $output_directory);
+$convert= new Convert($image_directory, $output_directory);
 $convert->convert();
 
 /**
@@ -67,3 +67,4 @@ $convert->convert();
  * Loop through input directories
  * create directory if not found on output directory
  */
+
