@@ -15,6 +15,7 @@ class AutoConverter  extends FetchDirectory
     private $outputdir;
     private $quality=75;
     private $image_directory_array=[];
+    const IMAGE_QUALITIES = ['25', '50', '75', '100'];
 
     public function __construct($inputdir, $outputdir) {
         $this->setImageQuality();
@@ -30,16 +31,22 @@ class AutoConverter  extends FetchDirectory
             try {
                 foreach ($imageAr as $value) {
                     //encode images to webp
-                    $image = Image::make($value)->encode('webp', $this->quality);
+                    $image = Image::make($value)->encode('webp');
                     //Filename without Extension
                     $filename= pathinfo($value, PATHINFO_FILENAME);
                     //Filename to Store
                     $filenameToStore= $filename.'.webp';
-                    $path_to_save="$this->outputdir$dir";
-                    if (!file_exists($path_to_save)) {
-                        mkdir($path_to_save, 666, true);
+
+                    foreach (self::IMAGE_QUALITIES as $image_quality) {
+                        $this->quality = (int)$image_quality;
+                        $path_to_save="$this->outputdir$image_quality/$dir";
+                        
+                        if (!file_exists($path_to_save)) {
+                            mkdir($path_to_save, 666, true);
+                        }
+                        
+                        $image->save("$this->outputdir$image_quality/$dir$filenameToStore", $this->quality);
                     }
-                    $image->save("$this->outputdir$dir$filenameToStore", $this->quality);
                 }
             } catch (\Exception $e) {
                 echo $e->getMessage();
@@ -75,10 +82,11 @@ $convert->convert();
 
 /**
  * Task-------
- * Loop through input directories
- * create directory if not found on output directory
- * Save files in each directory
- * 25,50,75,100
- * 
+ * Loop through input directories---------------------------
+ * create directory if not found on output directory--------
+ * Save files in each directory-----------------------------
+ * 25,50,75,100---------------------------------------------
+ * Check for new files
+ * convert only them
  */
 
