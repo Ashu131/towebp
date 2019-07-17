@@ -27,6 +27,10 @@ class AutoConverter
         $this->image_directory_array    = $this->subDirectoriesArray($this->inputdir);
     }
 
+    /**
+     * @param array | $allImageArray
+     * @return $newFilesArray OR $allImageArray
+     */
     private function getNewFiles(array $allImageArray)
     {
         if ($this->convert_new_file_status) {
@@ -79,6 +83,10 @@ class AutoConverter
         }
     }
 
+    /**
+     * @param $dir
+     * @return array | $images
+     */
     private function getImageArrayFromDirectory($dir)
     {
         $images = [];
@@ -91,6 +99,7 @@ class AutoConverter
     /**
      * This function will alter array values
      * by "concate" function
+     * @param $dir
      */
     public function subDirectoriesArray($dir= 'pictures/all')
     {
@@ -104,6 +113,10 @@ class AutoConverter
         $value.="/";
     }
 
+    /**
+     * @param $dir
+     * @return array | $subDir
+     */
     public function getSubDirectories($dir)
     {
         $subDir = array();
