@@ -1,4 +1,20 @@
 # Convert Images to Webp
+Search for images in subdirectories recursively, will create the same structure in **Output** folder  
+By default images will be converted in four compressions(25, 50, 75, 100).
+For Example.:
+> Root directory- `files/pictures/`  
+Input Directory- `files/pictures/images`  
+Output Directory- `converted/`  
+
+Output Will be.:  
+`converted/25/images/`  
+`converted/50/images/`  
+`converted/75/images/`  
+`converted/100/images/`  
+
+## Requirements
+This package requires [Intervention Image Package](http://image.intervention.io/)  
+> Run `composer install`
 ## How to convert images to webp
 
 Initiate `AutoConverter.php` Class  
