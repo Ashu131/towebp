@@ -13,18 +13,22 @@ class AutoConverter
     private $outputdir;
     private $quality=75;
     private $image_directory_array=[];
+    private $remove_directory_array = [];
 
     const IMAGE_QUALITIES = ['25', '50', '75', '100'];
 
     private $convert_new_file_status = true;
 
-    public function __construct($rootdir, $inputdir, $outputdir, $convert_new_file_status=true) {
+    public function __construct($rootdir, $inputdir, $outputdir,array $remove_directory_array, $convert_new_file_status=true) {
         $this->setImageQuality();
-        $this->rootdir                 = $rootdir;
+        $this->rootdir                  = $rootdir;
         $this->inputdir                 = $inputdir;
         $this->outputdir                = $outputdir;
+        $this->remove_directory_array   = $remove_directory_array;
         $this->convert_new_file_status  = $convert_new_file_status;
         $this->image_directory_array    = $this->subDirectoriesArray($this->inputdir);
+        // remove some directories to be converted
+        $this->filterDirectoryArray();
     }
 
     /**
@@ -75,6 +79,9 @@ class AutoConverter
         }
     }
 
+    /**
+     * Set Image via CLI on second parameter ex. php AutoConverter -q25
+     */
     private function setImageQuality()
     {
         $num = getopt("q:");
@@ -105,12 +112,41 @@ class AutoConverter
     {
         $subDirArr = $this->getSubDirectories($dir);
         array_walk($subDirArr,array($this,"concate"));
+        
         return $subDirArr;
     }
-
+    
     private function concate(&$value,$key)
     {
         $value.="/";
+    }
+
+    /**
+     * Unset some directory array values form Directories array
+     */
+    private function filterDirectoryArray()
+    {
+        $keys_to_unset = $this->array_find($this->remove_directory_array, $this->image_directory_array);
+        foreach ($keys_to_unset as $key) {
+            unset($this->image_directory_array[$key]);
+        }
+    }
+
+    /**
+     * @param $values_to_remove | $main_array
+     * @return array $keys_to_unset
+     */
+    private function array_find(array $values_to_remove, array $main_array)
+    {
+        $keys_to_unset = [];
+        foreach ($values_to_remove as $needle) {
+            foreach ($main_array as $key => $value) {
+                if (stripos($value, $needle) !== false) { 
+                    $keys_to_unset[] = $key;
+                }
+            }
+        }
+        return $keys_to_unset;
     }
 
     /**
@@ -134,10 +170,12 @@ class AutoConverter
  * Parameters of class instantiation
  * First    => Image Directory(without forward slash)
  * Second   => Ouptput Directory
- * Third    => Default(true) for new image converting only
+ * Third    => List of directories which don't need to be converted
+ * Fourth   => Default(true) for new image converting only
  */
 $root_directory = '/var/www/html/ashutosh/modules/imagetowebp/pictures';
 $image_directory= $root_directory.'/all';  $output_directory= $root_directory.'/new/';
+$remove_directory = ['/var/www/html/ashutosh/modules/imagetowebp/pictures/all/first/parent/','second'];
 
-$convert= new AutoConverter($root_directory, $image_directory, $output_directory, false);
+$convert= new AutoConverter($root_directory, $image_directory, $output_directory, $remove_directory, false);
 $convert->convert();
