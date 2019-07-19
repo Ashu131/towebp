@@ -32,18 +32,75 @@ class AutoConverter
     }
 
     /**
-     * @param array | $allImageArray
-     * @return $newFilesArray OR $allImageArray
+     * Set Image via CLI on second parameter ex. php AutoConverter -q25
      */
-    private function getNewFiles(array $allImageArray)
+    private function setImageQuality()
     {
-        if ($this->convert_new_file_status) {
-            $newFilesArray = array_filter($allImageArray, function ($file) {
-                return filemtime($file) >= strtotime("-1 days");
-            });
-            return $newFilesArray;
+        $num = getopt("q:");
+        if ($num !== false && isset($num['q'])) {
+            $this->quality = (int)$num['q'];
         }
-        return $allImageArray;
+    }
+
+    /**
+     * This function will alter array values
+     * by "concate" function
+     * @param $dir
+     */
+    public function subDirectoriesArray($dir= 'pictures/all')
+    {
+        $subDirArr = $this->getSubDirectories($dir);
+        array_walk($subDirArr,array($this,"concate"));
+        
+        return $subDirArr;
+    }
+    
+    private function concate(&$value,$key)
+    {
+        $value.="/";
+    }
+
+    /**
+     * @param $dir
+     * @return array | $subDir
+     */
+    public function getSubDirectories($dir)
+    {
+        $subDir = array();
+        $directories = array_filter(glob($dir), 'is_dir');
+        $subDir = array_merge($subDir, $directories);
+        foreach ($directories as $directory){
+            $subDir = array_merge($subDir, $this->getSubDirectories($directory.'/*'));
+        }
+        return $subDir;
+    }
+
+    /**
+     * Unset some directory array values form Directories array
+     */
+    private function filterDirectoryArray()
+    {
+        $keys_to_unset = $this->array_find($this->remove_directory_array, $this->image_directory_array);
+        foreach ($keys_to_unset as $key) {
+            unset($this->image_directory_array[$key]);
+        }
+    }
+
+    /**
+     * @param $values_to_remove | $main_array
+     * @return array $keys_to_unset
+     */
+    private function array_find(array $values_to_remove, array $main_array)
+    {
+        $keys_to_unset = [];
+        foreach ($values_to_remove as $needle) {
+            foreach ($main_array as $key => $value) {
+                if (stripos($value, $needle) !== false) { 
+                    $keys_to_unset[] = $key;
+                }
+            }
+        }
+        return $keys_to_unset;
     }
 
     public function convert()
@@ -80,17 +137,6 @@ class AutoConverter
     }
 
     /**
-     * Set Image via CLI on second parameter ex. php AutoConverter -q25
-     */
-    private function setImageQuality()
-    {
-        $num = getopt("q:");
-        if ($num !== false && isset($num['q'])) {
-            $this->quality = (int)$num['q'];
-        }
-    }
-
-    /**
      * @param $dir
      * @return array | $images
      */
@@ -104,65 +150,20 @@ class AutoConverter
     }
 
     /**
-     * This function will alter array values
-     * by "concate" function
-     * @param $dir
+     * @param array | $allImageArray
+     * @return $newFilesArray OR $allImageArray
      */
-    public function subDirectoriesArray($dir= 'pictures/all')
+    private function getNewFiles(array $allImageArray)
     {
-        $subDirArr = $this->getSubDirectories($dir);
-        array_walk($subDirArr,array($this,"concate"));
-        
-        return $subDirArr;
-    }
-    
-    private function concate(&$value,$key)
-    {
-        $value.="/";
+        if ($this->convert_new_file_status) {
+            $newFilesArray = array_filter($allImageArray, function ($file) {
+                return filemtime($file) >= strtotime("-1 days");
+            });
+            return $newFilesArray;
+        }
+        return $allImageArray;
     }
 
-    /**
-     * Unset some directory array values form Directories array
-     */
-    private function filterDirectoryArray()
-    {
-        $keys_to_unset = $this->array_find($this->remove_directory_array, $this->image_directory_array);
-        foreach ($keys_to_unset as $key) {
-            unset($this->image_directory_array[$key]);
-        }
-    }
-
-    /**
-     * @param $values_to_remove | $main_array
-     * @return array $keys_to_unset
-     */
-    private function array_find(array $values_to_remove, array $main_array)
-    {
-        $keys_to_unset = [];
-        foreach ($values_to_remove as $needle) {
-            foreach ($main_array as $key => $value) {
-                if (stripos($value, $needle) !== false) { 
-                    $keys_to_unset[] = $key;
-                }
-            }
-        }
-        return $keys_to_unset;
-    }
-
-    /**
-     * @param $dir
-     * @return array | $subDir
-     */
-    public function getSubDirectories($dir)
-    {
-        $subDir = array();
-        $directories = array_filter(glob($dir), 'is_dir');
-        $subDir = array_merge($subDir, $directories);
-        foreach ($directories as $directory){
-            $subDir = array_merge($subDir, $this->getSubDirectories($directory.'/*'));
-        }
-        return $subDir;
-    }
 }
 
 /**
